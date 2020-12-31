@@ -46,10 +46,28 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.gis",
+    "django.contrib.sites",
     "crispy_forms",
     "import_export",
     "django_filters",
     "leaflet",
+    "storages",
+    # allauth related apps
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
+    # providers
+    "allauth.socialaccount.providers.google",
+    "allauth.socialaccount.providers.facebook",
+]
+
+SITE_ID = 1
+
+AUTH_USER_MODEL = "accessible_restaurant.User"
+
+AUTHENTICATION_BACKENDS = [
+    "django.contrib.auth.backends.ModelBackend",
+    "allauth.account.auth_backends.AuthenticationBackend",
 ]
 
 MIDDLEWARE = [
@@ -116,7 +134,9 @@ AUTH_PASSWORD_VALIDATORS = [
 
 
 # Internationalization
-# https://docs.djangoproject.com/en/3.1/LANGUAGE_CODE = "en-us"
+# https://docs.djangoproject.com/en/3.1/topics/i18n/
+
+LANGUAGE_CODE = "en-us"
 
 TIME_ZONE = "America/New_York"
 
@@ -130,18 +150,40 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
+
 STATIC_URL = "/static/"
 
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 MEDIA_URL = "/media/"
 
+# AWS settings
+AWS_ACCESS_KEY_ID = "AKIAR4MJX54OQDOW2X6E"
+AWS_SECRET_ACCESS_KEY = "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"
+AWS_STORAGE_BUCKET_NAME = "accessible-restaurant"
+AWS_S3_CUSTOM_DOMAIN = "%s.s3.amazonaws.com" % AWS_STORAGE_BUCKET_NAME
+# AWS_DEFAULT_ACL = 'public-read'
+AWS_S3_OBJECT_PARAMETERS = {
+    "CacheControl": "max-age=86400",
+}
+
+AWS_MEDIA_LOCATION = "media"
+MEDIAFILES_DIRS = [
+    os.path.join(BASE_DIR, "media"),
+]
+MEDIA_URL = "https://%s/%s/" % (AWS_S3_CUSTOM_DOMAIN, AWS_MEDIA_LOCATION)
+DEFAULT_FILE_STORAGE = "accessible_restaurant.storage_backends.MediaStorage"
+
+
 CRISPY_TEMPLATE_PACK = "bootstrap4"
 
+# Email setting
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_HOST_USER = "nyc.accessible.rest@gmail.com"
 EMAIL_HOST_PASSWORD = "6063team408"
 EMAIL_USE_TLS = True
 EMAIL_PORT = 587
+DEFAULT_TO_EMAIL = "nyc.accessible.rest@gmail.com"
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 
 
 django_heroku.settings(locals(), test_runner=False)
@@ -159,3 +201,16 @@ GEOIP_PATH = os.path.join(BASE_DIR, "geoip")
 GDAL_LIBRARY_PATH = os.environ.get("GDAL_LIBRARY_PATH")
 # Leaflet parameters
 LEAFLET_CONFIG = {"SCALE": None, "RESET_VIEW": False}
+
+# Third party email configuration
+ACCOUNT_EMAIL_REQUIRED = False
+ACCOUNT_EMAIL_VERIFICATION = "none"
+SOCIALACCOUNT_QUERY_EMAIL = False
+SOCIALACCOUNT_EMAIL_REQUIRED = False
+SOCIALACCOUNT_STORE_TOKENS = False
+
+# Third party account adpter
+ACCOUNT_ADAPTER = "nyc_accessible_restaurant_advisor.users.adapter.UserAccountAdapter"
+SOCIALACCOUNT_ADAPTER = (
+    "nyc_accessible_restaurant_advisor.users.adapter.CustomSocialAccountAdapter"
+)
